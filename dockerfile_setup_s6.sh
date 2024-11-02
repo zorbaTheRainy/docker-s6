@@ -19,12 +19,21 @@ detect_distro() {
 download_if_not_exists() {
     local url=$1
     local dest=$2
+    local dir=$(dirname $dest)
+
+    if [ ! -d $dir ]; then
+        echo "Directory $dir does not exist. Creating it..."
+        mkdir -p $dir
+    fi
+
     if [ ! -f $dest ]; then
+        echo "Downloading $url to $dest"
         wget $url -O $dest
     else
         echo "File $dest already exists. Skipping download."
     fi
 }
+
 
 # Pull all the files
 download_if_not_exists "${S6_URL_ROOT}/s6-overlay-noarch.tar.xz" "/tmp/s6-overlay-noarch.tar.xz"
