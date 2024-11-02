@@ -281,7 +281,7 @@ EXPOSE 2019
 FROM base
 # Copy the entire filesystem from the builder stage
 COPY --from=rootfs_stage / /
-COPY .bashrc /root/.bashrc
+COPY support_files/.bashrc /root/.bashrc
 
 # enable variables
 ENV ENABLE_DNSMASQ true
