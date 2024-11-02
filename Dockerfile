@@ -89,91 +89,14 @@ ADD ${S6_URL_ROOT}/s6-overlay-armhf.tar.xz             /tmp/s6-overlay-yesarch-a
 
 # copy over files that run scripts  NOTE:  do NOT forget to chmod 755 them in the git folder (or they won't be executable in the image)
 COPY etc/cont-init.d/99-enable-services.sh /tmp/99-enable-services.sh
-# COPY 99-enable-services_run /tmp/99-enable-services_run
+COPY dockerfile_setup_s6.sh /tmp/dockerfile_setup_s6.sh
 
 # integrate the files into the file system
-RUN apk update && \
-    apk add --no-cache bash xz && \
-    case "${TARGETARCH}" in \
-        amd64)  mv /tmp/s6-overlay-yesarch-amd64.tar.xz /tmp/s6-overlay-yesarch.tar.xz  ;; \
-        arm64)  mv /tmp/s6-overlay-yesarch-arm64.tar.xz /tmp/s6-overlay-yesarch.tar.xz  ;; \
-        arm) \
-            case "${TARGETVARIANT}" in \
-                v6)   mv /tmp/s6-overlay-yesarch-armv6.tar.xz /tmp/s6-overlay-yesarch.tar.xz  ;; \
-                v7)   mv /tmp/s6-overlay-yesarch-armv7.tar.xz /tmp/s6-overlay-yesarch.tar.xz  ;; \
-                v8)   mv /tmp/s6-overlay-yesarch-arm64.tar.xz /tmp/s6-overlay-yesarch.tar.xz  ;; \
-                *) echo >&2 "error: unsupported architecture (${TARGETARCH}/${TARGETVARIANT})"; exit 1 ;; \
-            esac ;; \
-        *) echo >&2 "error: unsupported architecture (${TARGETARCH}/${TARGETVARIANT})"; exit 1 ;; \
-    esac && \
-    tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-yesarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-yesarch.tar.xz && \
-    rm -f /tmp/s6-overlay-*.tar.xz && \
-    mkdir -p /etc/services.d/ && \
-    mkdir -p /etc/services-available && \
-    mkdir -p /etc/cont-init.d && \
-    mv /tmp/99-enable-services.sh /etc/cont-init.d/99-enable-services.sh && \
-    chmod 755 /etc/cont-init.d/99-enable-services.sh  \
-    ; 
-
-# S6_Overlay is just the process manager.  We need to add the docker-mod scripts from LinuxServer.io
-# from https://github.com/linuxserver/docker-baseimage-alpine/blob/master/Dockerfile
-ARG MODS_VERSION="v3"
-ARG PKG_INST_VERSION="v1"
-ARG LSIOWN_VERSION="v1"
-ARG LSIO_RELEASE_VERSION="3.20-2a6ecb14-ls14"
-    
-ADD --chmod=755 "https://raw.githubusercontent.com/linuxserver/docker-mods/mod-scripts/docker-mods.${MODS_VERSION}" "/docker-mods"
-ADD --chmod=755 "https://raw.githubusercontent.com/linuxserver/docker-mods/mod-scripts/package-install.${PKG_INST_VERSION}" "/etc/s6-overlay/s6-rc.d/init-mods-package-install/run"
-ADD --chmod=755 "https://raw.githubusercontent.com/linuxserver/docker-mods/mod-scripts/lsiown.${LSIOWN_VERSION}" "/usr/bin/lsiown"
+RUN /tmp/dockerfile_setup_s6.sh
 
 # environment variables
-ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
-  HOME="/root" \
-  TERM="xterm" \
-  S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
-  S6_VERBOSITY=1 \
-  S6_STAGE2_HOOK=/docker-mods \
-  VIRTUAL_ENV=/lsiopy \
-  PATH="/lsiopy/bin:$PATH"
 
-RUN \
-  echo "**** install runtime packages ****" && \
-  apk add --no-cache \
-    alpine-release \
-    bash \
-    ca-certificates \
-    catatonit \
-    coreutils \
-    curl \
-    findutils \
-    jq \
-    netcat-openbsd \
-    procps-ng \
-    shadow \
-    tzdata && \
-  echo "**** create abc user and make our folders ****" && \
-  groupmod -g 1000 users && \
-  useradd -u 911 -U -d /config -s /bin/false abc && \
-  usermod -G users abc && \
-  mkdir -p \
-    /app \
-    /config \
-    /defaults \
-    /lsiopy && \
-  echo "**** cleanup ****" && \
-  rm -rf \
-    /tmp/*
 
-# copy files from the official LinuxServices.io Alpine image's GitHub
-# as tempting as it is to pull the directory off a base-image or more accurately to use their base-image as my base-image, LSIO only builds for AMD64 and ARM64
-# ghcr.io/linuxserver/baseimage-alpine:3.20
-ADD https://github.com/linuxserver/docker-baseimage-alpine/archive/refs/tags/${LSIO_RELEASE_VERSION}.tar.gz /tmp/${LSIO_RELEASE_VERSION}.tar.gz 
-RUN tar -C /tmp -xzvf /tmp/${LSIO_RELEASE_VERSION}.tar.gz && \
-    cp -a /tmp/docker-baseimage-alpine-${LSIO_RELEASE_VERSION}/root/etc/s6-overlay/s6-rc.d /etc/s6-overlay/ && \
-    rm -rf /tmp/*
 
     # -------------------------------------------------------------------------------------------------
     # dnsmasq/webproc docker ->  https://github.com/jpillora/docker-dnsmasq

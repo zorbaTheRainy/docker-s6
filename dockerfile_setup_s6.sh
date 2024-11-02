@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Inputs
@@ -14,9 +14,6 @@ detect_distro() {
         echo "unknown"
     fi
 }
-
-DISTRO=$(detect_distro)
-echo "Detected Linux distribution: $DISTRO"
 
 # Function to download files if they don't already exist
 download_if_not_exists() {
@@ -37,6 +34,9 @@ download_if_not_exists "${S6_URL_ROOT}/s6-overlay-x86_64.tar.xz" "/tmp/s6-overla
 download_if_not_exists "${S6_URL_ROOT}/s6-overlay-aarch64.tar.xz" "/tmp/s6-overlay-yesarch-arm64.tar.xz"
 download_if_not_exists "${S6_URL_ROOT}/s6-overlay-arm.tar.xz" "/tmp/s6-overlay-yesarch-armv7.tar.xz"
 download_if_not_exists "${S6_URL_ROOT}/s6-overlay-armhf.tar.xz" "/tmp/s6-overlay-yesarch-armv6.tar.xz"
+
+DISTRO=$(detect_distro)
+echo "Detected Linux distribution: $DISTRO"
 
 # Integrate the files into the file system
 case "$DISTRO" in
@@ -98,6 +98,16 @@ download_if_not_exists "https://raw.githubusercontent.com/linuxserver/docker-mod
 chmod 755 /docker-mods /etc/s6-overlay/s6-rc.d/init-mods-package-install/run /usr/bin/lsiown
 
 # Environment setup
+export PS1="$(whoami)@$(hostname):$(pwd)\\$ " 
+export HOME="/root" 
+export TERM="xterm" 
+export S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" 
+export S6_VERBOSITY=1 
+export S6_STAGE2_HOOK=/docker-mods 
+export VIRTUAL_ENV=/lsiopy 
+export PATH="/lsiopy/bin:$PATH"
+
+
 case "$DISTRO" in
     alpine)
         echo "**** install runtime packages ****"
