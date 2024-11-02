@@ -107,14 +107,14 @@ download_if_not_exists "https://raw.githubusercontent.com/linuxserver/docker-mod
 chmod 755 /docker-mods /etc/s6-overlay/s6-rc.d/init-mods-package-install/run /usr/bin/lsiown
 
 # Environment setup
-export PS1="$(whoami)@$(hostname):$(pwd)\\$ " 
-export HOME="/root" 
-export TERM="xterm" 
-export S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" 
-export S6_VERBOSITY=1 
-export S6_STAGE2_HOOK=/docker-mods 
-export VIRTUAL_ENV=/lsiopy 
-export PATH="/lsiopy/bin:$PATH"
+PS1="$(whoami)@$(hostname):$(pwd)\\$ " 
+HOME="/root" 
+TERM="xterm" 
+S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" 
+S6_VERBOSITY=1 
+S6_STAGE2_HOOK=/docker-mods 
+VIRTUAL_ENV=/lsiopy 
+PATH="/lsiopy/bin:$PATH"
 
 
 case "$DISTRO" in
@@ -134,6 +134,10 @@ case "$DISTRO" in
             shadow \
             tzdata
 
+        apk add iptables-legacy
+        ln -sf /sbin/iptables-legacy /sbin/iptables
+        ln -sf /sbin/ip6tables-legacy /sbin/ip6tables
+        
         echo "**** create abc user and make our folders ****"
         groupmod -g 1000 users
         useradd -u 911 -U -d /config -s /bin/false abc
