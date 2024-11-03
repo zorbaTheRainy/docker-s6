@@ -78,8 +78,8 @@ RUN apk update && \
 RUN chmod 755 /tmp/tailscale_install.sh
 # RUN /tmp/tailscale_install.sh
 RUN apk add tailscale
-RUN rc-update add tailscale
-RUN rc-service tailscale start
+# RUN rc-update add tailscale
+# RUN rc-service tailscale start
 
     # -------------------------------------------------------------------------------------------------
     # dnsmasq/webproc docker ->  https://github.com/jpillora/docker-dnsmasq
