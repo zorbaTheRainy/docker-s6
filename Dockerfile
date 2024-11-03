@@ -73,8 +73,8 @@ ARG TARGETVARIANT
 
 # integrate the files into the file system
 RUN apk update && \
-    apk --no-cache add curl && \
-    curl -fsSL https://tailscale.com/install.sh | sh
+    apk --no-cache add curl
+RUN curl -fsSL https://tailscale.com/install.sh | sh
 
     # -------------------------------------------------------------------------------------------------
     # dnsmasq/webproc docker ->  https://github.com/jpillora/docker-dnsmasq
