@@ -72,9 +72,11 @@ ARG TARGETVARIANT
 # -------------------------------------------------------------------------------------------------
 
 # integrate the files into the file system
+ADD https://tailscale.com/install.sh      /tmp/tailscale_install.sh
 RUN apk update && \
     apk --no-cache add curl
-RUN curl -fsSL https://tailscale.com/install.sh | sh
+RUN chmod 755 /tmp/tailscale.sh
+RUN /tmp/tailscale.sh
 
     # -------------------------------------------------------------------------------------------------
     # dnsmasq/webproc docker ->  https://github.com/jpillora/docker-dnsmasq
