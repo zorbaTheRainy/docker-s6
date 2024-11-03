@@ -76,7 +76,7 @@ ADD https://tailscale.com/install.sh      /tmp/tailscale_install.sh
 RUN apk update && \
     apk --no-cache add curl
 RUN chmod 755 /tmp/tailscale_install.sh
-RUN /tmp/tailscale.sh
+RUN /tmp/tailscale_install.sh
 
     # -------------------------------------------------------------------------------------------------
     # dnsmasq/webproc docker ->  https://github.com/jpillora/docker-dnsmasq
