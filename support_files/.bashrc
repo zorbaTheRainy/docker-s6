@@ -6,3 +6,4 @@ alias ls='ls -asFh --color=auto'
 alias mkdir='mkdir -pv'
 alias rm='rm -i'
 alias where=which
+alias ping='ping -c 5 '
